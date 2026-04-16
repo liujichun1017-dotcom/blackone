@@ -12,10 +12,6 @@ services:
         value: production
       - key: NEXT_PUBLIC_SITE_NAME
         value: Black One
-      - key: NEXT_PUBLIC_SITE_URL
-        sync: false
-      - key: SITE_URL
-        sync: false
       - key: ADMIN_USERNAME
         sync: false
       - key: ADMIN_PASSWORD

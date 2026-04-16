@@ -53,8 +53,6 @@ npm run dev
 ## 环境变量
 
 - `NEXT_PUBLIC_SITE_NAME`：站点名称
-- `NEXT_PUBLIC_SITE_URL`：前台公开地址
-- `SITE_URL`：服务端使用的公开地址
 - `ADMIN_USERNAME`：后台账号
 - `ADMIN_PASSWORD`：后台密码
 - `SESSION_SECRET`：后台会话签名密钥
