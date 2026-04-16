@@ -84,6 +84,24 @@ docker run -d \
 - `storage` 目录需要挂载为持久卷，否则重新部署会丢失上传内容与数据库
 - 若部署到 Railway / Render / VPS，核心要求也是同样两点：提供 Node 22+ 与持久化存储
 
+## 服务器一键部署
+
+仓库已经包含 `compose.yaml` 和 `.env.production.example`，适合直接在 Linux 服务器上部署：
+
+```bash
+cp .env.production.example .env.production
+docker compose --env-file .env.production up -d --build
+```
+
+常用命令：
+
+```bash
+docker compose --env-file .env.production ps
+docker compose --env-file .env.production logs -f
+docker compose --env-file .env.production up -d --build
+docker compose --env-file .env.production down
+```
+
 ## Render 部署
 
 这个仓库已经包含根目录 `render.yaml`，可以直接用 Render Blueprint 导入。
