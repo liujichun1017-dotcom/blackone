@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: blackone
+    runtime: docker
+    plan: starter
+    region: singapore
+    healthCheckPath: /
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_SITE_NAME
+        value: Black One
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: SITE_URL
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+    disk:
+      name: storage
+      mountPath: /app/storage
+      sizeGB: 1

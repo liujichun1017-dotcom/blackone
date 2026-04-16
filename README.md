@@ -86,6 +86,22 @@ docker run -d \
 - `storage` 目录需要挂载为持久卷，否则重新部署会丢失上传内容与数据库
 - 若部署到 Railway / Render / VPS，核心要求也是同样两点：提供 Node 22+ 与持久化存储
 
+## Render 部署
+
+这个仓库已经包含根目录 `render.yaml`，可以直接用 Render Blueprint 导入。
+
+注意：
+
+- 这套系统依赖持久化磁盘保存 `storage`，因此不适合 Render Free 实例
+- 官方文档说明 Free web service 不能附加 persistent disk，所以建议至少使用 `Starter`
+- 当前 `render.yaml` 已经预设：
+  - `runtime: docker`
+  - `plan: starter`
+  - `region: singapore`
+  - 挂载磁盘到 `/app/storage`
+  - 自动生成 `SESSION_SECRET`
+  - 在导入时提示填写后台账号密码和站点地址
+
 ## 后续可扩展
 
 - 限量编号系统
