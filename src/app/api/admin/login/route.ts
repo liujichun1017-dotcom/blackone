@@ -1,5 +1,5 @@
 import { adminCookie, createAdminSessionToken, verifyAdminCredentials } from "@/lib/auth";
-import { redirectRelative } from "@/lib/redirect";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -9,10 +9,13 @@ export async function POST(request: Request) {
   const password = String(formData.get("password") ?? "");
 
   if (!verifyAdminCredentials(username, password)) {
-    return redirectRelative("/admin/login?error=1");
+    return NextResponse.json(
+      { ok: false, error: "账号或密码不正确，请检查后重试。" },
+      { status: 401 },
+    );
   }
 
-  const response = redirectRelative("/admin");
+  const response = NextResponse.json({ ok: true });
   response.cookies.set({
     name: adminCookie.name,
     value: createAdminSessionToken(),

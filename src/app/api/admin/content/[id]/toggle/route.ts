@@ -1,6 +1,6 @@
+import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { toggleExperience } from "@/lib/experience-service";
-import { getRelativeReferer, redirectRelative } from "@/lib/redirect";
 
 export const runtime = "nodejs";
 
@@ -9,12 +9,10 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   if (!(await isAdminAuthenticated())) {
-    return redirectRelative("/admin/login");
+    return NextResponse.json({ ok: false, error: "未登录或会话已过期。" }, { status: 401 });
   }
 
   const { id } = await params;
-  toggleExperience(id);
-
-  const referer = getRelativeReferer(request.headers.get("referer"));
-  return redirectRelative(referer);
+  const experience = toggleExperience(id);
+  return NextResponse.json({ ok: true, experience });
 }

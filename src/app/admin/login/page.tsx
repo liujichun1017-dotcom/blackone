@@ -1,17 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth";
+import { LoginForm } from "@/components/admin/login-form";
 
-export default async function AdminLoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
+export default async function AdminLoginPage() {
   if (await isAdminAuthenticated()) {
     redirect("/admin");
   }
-
-  const params = await searchParams;
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6 py-10">
@@ -50,40 +45,7 @@ export default async function AdminLoginPage({
 
           <section className="px-8 py-10 lg:px-10 lg:py-12">
             <div className="eyebrow text-xs uppercase tracking-[0.22em]">Operator Login</div>
-            <form action="/api/admin/login" method="post" className="mt-8 space-y-5">
-              <label className="block space-y-3">
-                <span className="text-sm text-white">后台账号</span>
-                <input
-                  name="username"
-                  className="input-shell w-full px-5 py-4 text-white outline-none"
-                  placeholder="operator"
-                  required
-                />
-              </label>
-              <label className="block space-y-3">
-                <span className="text-sm text-white">后台密码</span>
-                <input
-                  type="password"
-                  name="password"
-                  className="input-shell w-full px-5 py-4 text-white outline-none"
-                  placeholder="••••••••"
-                  required
-                />
-              </label>
-
-              {params.error ? (
-                <div className="rounded-[20px] border border-red-400/24 bg-red-500/8 px-4 py-3 text-sm text-red-200">
-                  账号或密码不正确，请检查后重试。
-                </div>
-              ) : null}
-
-              <button
-                type="submit"
-                className="metal-button mt-4 w-full px-6 py-4 text-sm tracking-[0.2em] uppercase"
-              >
-                进入后台
-              </button>
-            </form>
+            <LoginForm />
 
             <div className="mt-8 rounded-[24px] border border-white/8 bg-white/3 p-5 text-sm leading-7 text-white/54">
               默认会话是基于环境变量控制的。部署前请设置：

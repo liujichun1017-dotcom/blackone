@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CopyLinkButton } from "@/components/admin/copy-link-button";
 import { QrPreview } from "@/components/admin/qr-preview";
+import { ToggleStatusButton } from "@/components/admin/toggle-status-button";
 import { getDashboardMetrics, listExperiences } from "@/lib/db";
 import { formatDateTime, formatDuration } from "@/lib/utils";
 
@@ -129,17 +130,7 @@ export default function AdminDashboardPage() {
                     </Link>
                     <CopyLinkButton slug={experience.slug} />
                     <QrPreview slug={experience.slug} />
-                    <form
-                      action={`/api/admin/content/${experience.id}/toggle`}
-                      method="post"
-                    >
-                      <button
-                        type="submit"
-                        className="rounded-full border border-white/12 px-4 py-2 text-sm text-white/74 transition hover:border-white/28 hover:text-white"
-                      >
-                        {experience.status === "active" ? "停用链接" : "重新启用"}
-                      </button>
-                    </form>
+                    <ToggleStatusButton id={experience.id} status={experience.status} />
                   </div>
                 </div>
               </article>
