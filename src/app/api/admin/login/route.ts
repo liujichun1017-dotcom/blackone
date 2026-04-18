@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { adminCookie, createAdminSessionToken, verifyAdminCredentials } from "@/lib/auth";
+import { redirectRelative } from "@/lib/redirect";
 
 export const runtime = "nodejs";
 
@@ -9,10 +9,10 @@ export async function POST(request: Request) {
   const password = String(formData.get("password") ?? "");
 
   if (!verifyAdminCredentials(username, password)) {
-    return NextResponse.redirect(new URL("/admin/login?error=1", request.url));
+    return redirectRelative("/admin/login?error=1");
   }
 
-  const response = NextResponse.redirect(new URL("/admin", request.url));
+  const response = redirectRelative("/admin");
   response.cookies.set({
     name: adminCookie.name,
     value: createAdminSessionToken(),

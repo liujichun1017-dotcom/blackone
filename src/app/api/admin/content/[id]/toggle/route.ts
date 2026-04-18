@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { toggleExperience } from "@/lib/experience-service";
+import { getRelativeReferer, redirectRelative } from "@/lib/redirect";
 
 export const runtime = "nodejs";
 
@@ -9,12 +9,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   if (!(await isAdminAuthenticated())) {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+    return redirectRelative("/admin/login");
   }
 
   const { id } = await params;
   toggleExperience(id);
 
-  const referer = request.headers.get("referer") ?? "/admin";
-  return NextResponse.redirect(new URL(referer, request.url));
+  const referer = getRelativeReferer(request.headers.get("referer"));
+  return redirectRelative(referer);
 }

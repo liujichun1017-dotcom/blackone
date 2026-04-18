@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
 import { adminCookie } from "@/lib/auth";
+import { redirectRelative } from "@/lib/redirect";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
-  const response = NextResponse.redirect(new URL("/admin/login", request.url));
+export async function POST() {
+  const response = redirectRelative("/admin/login");
   response.cookies.set({
     name: adminCookie.name,
     value: "",
