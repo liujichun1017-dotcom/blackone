@@ -128,6 +128,14 @@ export default function AdminDashboardPage() {
                     >
                       编辑
                     </Link>
+                    <Link
+                      href={`/nfc/${experience.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full border border-white/12 px-4 py-2 text-sm text-white/76 transition hover:border-[var(--gold)] hover:text-white"
+                    >
+                      打开体验页
+                    </Link>
                     <CopyLinkButton slug={experience.slug} />
                     <QrPreview slug={experience.slug} />
                     <ToggleStatusButton id={experience.id} status={experience.status} />
