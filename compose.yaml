@@ -11,5 +11,6 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
+      ADMIN_COOKIE_SECURE: ${ADMIN_COOKIE_SECURE:-false}
     volumes:
       - ./storage:/app/storage

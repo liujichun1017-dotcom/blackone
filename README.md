@@ -56,6 +56,7 @@ npm run dev
 - `ADMIN_USERNAME`：后台账号
 - `ADMIN_PASSWORD`：后台密码
 - `SESSION_SECRET`：后台会话签名密钥
+- `ADMIN_COOKIE_SECURE`：若已上 HTTPS 可改为 `true`，纯 HTTP 请保持 `false`
 
 ## 存储结构
 

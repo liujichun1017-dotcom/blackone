@@ -5,4 +5,5 @@ export const appEnv = {
     "replace-this-before-production-blackone-session-secret",
   adminUsername: process.env.ADMIN_USERNAME ?? "operator",
   adminPassword: process.env.ADMIN_PASSWORD ?? "change-me-now",
+  adminCookieSecure: process.env.ADMIN_COOKIE_SECURE === "true",
 };
