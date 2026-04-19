@@ -12,6 +12,7 @@ type ExperiencePlayerProps = {
 export function ExperiencePlayer({ experience }: ExperiencePlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const autoplayPendingRef = useRef(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -22,28 +23,96 @@ export function ExperiencePlayer({ experience }: ExperiencePlayerProps) {
     if (!audio) {
       return;
     }
+    const activeAudio = audio;
 
-    async function attemptAutoplay() {
-      if (!audio) {
-        return;
+    async function attemptAutoplay(allowMutedFallback = true) {
+      if (!activeAudio.paused) {
+        setAutoplayBlocked(false);
+        return true;
       }
 
+      if (autoplayPendingRef.current) {
+        return false;
+      }
+
+      autoplayPendingRef.current = true;
+
       try {
-        await audio.play();
+        await activeAudio.play();
         setAutoplayBlocked(false);
+        return true;
       } catch {
-        setAutoplayBlocked(true);
+        if (!allowMutedFallback) {
+          setAutoplayBlocked(true);
+          return false;
+        }
+
+        const previousMuted = activeAudio.muted;
+
+        try {
+          // Some mobile browsers permit autoplay only after a muted warm start.
+          activeAudio.muted = true;
+          await activeAudio.play();
+          activeAudio.muted = previousMuted;
+          setAutoplayBlocked(false);
+          return true;
+        } catch {
+          activeAudio.muted = previousMuted;
+          setAutoplayBlocked(true);
+          return false;
+        }
+      } finally {
+        autoplayPendingRef.current = false;
+      }
+    }
+
+    function attemptAutoplayFromGesture() {
+      void attemptAutoplay(false);
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        void attemptAutoplay();
+      }
+    }
+
+    function handlePageShow() {
+      void attemptAutoplay();
+    }
+
+    function handleBridgeReady() {
+      void attemptAutoplay();
+    }
+
+    function attachGestureRetry() {
+      window.addEventListener("pointerdown", attemptAutoplayFromGesture, {
+        passive: true,
+      });
+      window.addEventListener("touchstart", attemptAutoplayFromGesture, {
+        passive: true,
+      });
+      window.addEventListener("keydown", attemptAutoplayFromGesture);
+    }
+
+    function detachGestureRetry() {
+      window.removeEventListener("pointerdown", attemptAutoplayFromGesture);
+      window.removeEventListener("touchstart", attemptAutoplayFromGesture);
+      window.removeEventListener("keydown", attemptAutoplayFromGesture);
+    }
+
+    function refreshGestureRetry() {
+      if (activeAudio.paused) {
+        attachGestureRetry();
+      } else {
+        detachGestureRetry();
       }
     }
 
     function syncState() {
-      if (!audio) {
-        return;
-      }
-
-      setCurrentTime(audio.currentTime || 0);
-      setDuration(audio.duration || experience.durationSeconds);
-      setIsPlaying(!audio.paused);
+      setCurrentTime(activeAudio.currentTime || 0);
+      setDuration(activeAudio.duration || experience.durationSeconds);
+      setIsPlaying(!activeAudio.paused);
+      refreshGestureRetry();
     }
 
     const handleLoaded = () => {
@@ -51,22 +120,54 @@ export function ExperiencePlayer({ experience }: ExperiencePlayerProps) {
       void attemptAutoplay();
     };
 
-    audio.addEventListener("loadedmetadata", handleLoaded);
-    audio.addEventListener("timeupdate", syncState);
-    audio.addEventListener("play", syncState);
-    audio.addEventListener("pause", syncState);
+    const handleCanPlay = () => {
+      void attemptAutoplay();
+    };
 
-    if (audio.readyState >= 1) {
+    activeAudio.addEventListener("loadedmetadata", handleLoaded);
+    activeAudio.addEventListener("canplay", handleCanPlay);
+    activeAudio.addEventListener("timeupdate", syncState);
+    activeAudio.addEventListener("play", syncState);
+    activeAudio.addEventListener("pause", syncState);
+    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("WeixinJSBridgeReady", handleBridgeReady);
+    document.addEventListener("YixinJSBridgeReady", handleBridgeReady);
+    attachGestureRetry();
+
+    if (activeAudio.readyState >= 1) {
       handleLoaded();
+    } else {
+      void attemptAutoplay();
     }
 
     return () => {
-      audio.removeEventListener("loadedmetadata", handleLoaded);
-      audio.removeEventListener("timeupdate", syncState);
-      audio.removeEventListener("play", syncState);
-      audio.removeEventListener("pause", syncState);
+      detachGestureRetry();
+      activeAudio.removeEventListener("loadedmetadata", handleLoaded);
+      activeAudio.removeEventListener("canplay", handleCanPlay);
+      activeAudio.removeEventListener("timeupdate", syncState);
+      activeAudio.removeEventListener("play", syncState);
+      activeAudio.removeEventListener("pause", syncState);
+      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("WeixinJSBridgeReady", handleBridgeReady);
+      document.removeEventListener("YixinJSBridgeReady", handleBridgeReady);
     };
   }, [experience.durationSeconds]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    audio.currentTime = 0;
+    audio.load();
+    setCurrentTime(0);
+    setDuration(experience.durationSeconds);
+    setIsPlaying(false);
+    setAutoplayBlocked(false);
+  }, [experience.processedAudioPath, experience.durationSeconds]);
 
   useEffect(() => {
     void fetch("/api/track", {
@@ -355,7 +456,9 @@ export function ExperiencePlayer({ experience }: ExperiencePlayerProps) {
       <audio
         ref={audioRef}
         src={`/media/${experience.processedAudioPath}`}
+        autoPlay
         loop
+        playsInline
         preload="auto"
       />
     </main>
