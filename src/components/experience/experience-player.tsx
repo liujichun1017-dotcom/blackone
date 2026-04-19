@@ -322,6 +322,20 @@ export function ExperiencePlayer({ experience }: ExperiencePlayerProps) {
     };
   }, [experience]);
 
+  async function resumePlayback() {
+    const audio = audioRef.current;
+    if (!audio || !audio.paused) {
+      return;
+    }
+
+    try {
+      await audio.play();
+      setAutoplayBlocked(false);
+    } catch {
+      setAutoplayBlocked(true);
+    }
+  }
+
   async function togglePlayback() {
     const audio = audioRef.current;
     if (!audio) {
@@ -342,7 +356,18 @@ export function ExperiencePlayer({ experience }: ExperiencePlayerProps) {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main
+      className="relative min-h-screen overflow-hidden"
+      onPointerDownCapture={() => {
+        void resumePlayback();
+      }}
+      onTouchStartCapture={() => {
+        void resumePlayback();
+      }}
+      onClickCapture={() => {
+        void resumePlayback();
+      }}
+    >
       <div
         className="absolute inset-0 opacity-22"
         style={
@@ -372,13 +397,9 @@ export function ExperiencePlayer({ experience }: ExperiencePlayerProps) {
             <canvas ref={canvasRef} className="h-[56vh] w-full max-w-4xl" />
 
             {autoplayBlocked ? (
-              <button
-                type="button"
-                onClick={togglePlayback}
-                className="metal-button absolute bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 text-sm tracking-[0.18em] uppercase"
-              >
-                轻触开启声音
-              </button>
+              <div className="pointer-events-none absolute bottom-10 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-[rgba(7,10,16,0.72)] px-5 py-3 text-xs uppercase tracking-[0.18em] text-white/68 backdrop-blur-md">
+                轻触页面任意位置，声音即会开启
+              </div>
             ) : null}
           </section>
 
